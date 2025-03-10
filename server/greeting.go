@@ -13,8 +13,8 @@ type GreetingServer struct {
 
 // NewGreetingServer - Create a new Greeting server
 func NewGreetingServer(cfg *config.Config) (*GreetingServer, error) {
-	zap.S().Info("creating new Greeting server",
-		zap.String("default_message", cfg.Greeting.DefaultMessage))
+	zap.S().Infow("creating new Greeting server",
+		"default_message", cfg.Greeting.DefaultMessage)
 
 	return &GreetingServer{
 		DefaultMessage: cfg.Greeting.DefaultMessage,
@@ -27,5 +27,5 @@ func (s *GreetingServer) GenerateGreeting(name string) (string, error) {
 	if name == "" {
 		return s.DefaultMessage, nil
 	}
-	return s.DefaultMessage + " " + name + "さん！", nil
+	return s.DefaultMessage + " " + name + "!", nil
 }

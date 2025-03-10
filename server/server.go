@@ -12,44 +12,44 @@ import (
 
 // Run - Execute the MCP server
 func Run(cfg *config.Config) error {
-	zap.S().Info("starting MCP Greeting Server")
+	zap.S().Infow("starting MCP Greeting Server")
 
 	// Channel to prevent server from terminating
 	done := make(chan struct{})
 
 	// Create Greeting server
-	zap.S().Debug("creating Greeting server")
+	zap.S().Debugw("creating Greeting server")
 	greetingServer, err := NewGreetingServer(cfg)
 	if err != nil {
-		zap.S().Error("failed to create Greeting server", zap.Error(err))
+		zap.S().Errorw("failed to create Greeting server", "error", err)
 		return err
 	}
 
 	// Create server with stdio transport
-	zap.S().Debug("creating MCP server with stdio transport")
+	zap.S().Debugw("creating MCP server with stdio transport")
 	transport := stdio.NewStdioServerTransport()
 	server := mcp.NewServer(transport)
 
 	// Register all tools
-	zap.S().Debug("registering tools")
+	zap.S().Debugw("registering tools")
 	if err := tools.RegisterAllTools(server, greetingServer); err != nil {
-		zap.S().Error("failed to register tools", zap.Error(err))
+		zap.S().Errorw("failed to register tools", "error", err)
 		return err
 	}
 
 	// Start the server
-	zap.S().Info("starting MCP server")
+	zap.S().Infow("starting MCP server")
 	err = server.Serve()
 	if err != nil {
-		zap.S().Error("failed to start server", zap.Error(err))
+		zap.S().Errorw("failed to start server", "error", err)
 		return errors.Wrap(err, "failed to start server")
 	}
 
-	zap.S().Info("mcp Greeting server started successfully")
+	zap.S().Infow("mcp Greeting server started successfully")
 
 	// Block to prevent program termination
-	zap.S().Info("waiting for requests...")
+	zap.S().Infow("waiting for requests...")
 	<-done
-	zap.S().Info("server shutting down")
+	zap.S().Infow("server shutting down")
 	return nil
 }

@@ -8,7 +8,7 @@ import (
 )
 
 func TestGreetingServer_GenerateGreeting(t *testing.T) {
-	// テストケース
+	// Test cases
 	testCases := []struct {
 		name           string
 		defaultMessage string
@@ -16,39 +16,39 @@ func TestGreetingServer_GenerateGreeting(t *testing.T) {
 		expected       string
 	}{
 		{
-			name:           "デフォルトメッセージのみ",
-			defaultMessage: "こんにちは！",
-			inputName:      "",
-			expected:       "こんにちは！",
-		},
-		{
-			name:           "名前付きの挨拶",
-			defaultMessage: "こんにちは！",
-			inputName:      "田中",
-			expected:       "こんにちは！ 田中さん！",
-		},
-		{
-			name:           "別のデフォルトメッセージ",
+			name:           "Default message only",
 			defaultMessage: "Hello!",
+			inputName:      "",
+			expected:       "Hello!",
+		},
+		{
+			name:           "Greeting with name",
+			defaultMessage: "Hello!",
+			inputName:      "Tanaka",
+			expected:       "Hello! Tanaka!",
+		},
+		{
+			name:           "Different default message",
+			defaultMessage: "Hi!",
 			inputName:      "Smith",
-			expected:       "Hello! Smithさん！",
+			expected:       "Hi! Smith!",
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// テスト用の設定を作成
+			// Create test configuration
 			cfg := &config.Config{}
 			cfg.Greeting.DefaultMessage = tc.defaultMessage
 
-			// GreetingServerを初期化
+			// Initialize GreetingServer
 			server, err := NewGreetingServer(cfg)
 			assert.NoError(t, err)
 
-			// 挨拶を生成
+			// Generate greeting
 			greeting, err := server.GenerateGreeting(tc.inputName)
-			
-			// アサーション
+
+			// Assertions
 			assert.NoError(t, err)
 			assert.Equal(t, tc.expected, greeting)
 		})

@@ -18,18 +18,18 @@ type Greeter interface {
 
 // RegisterGreetingHelloTool - Register the greeting/hello tool
 func RegisterGreetingHelloTool(server *mcp.Server, greeter Greeter) error {
-	zap.S().Debug("registering greeting/hello tool")
+	zap.S().Debugw("registering greeting/hello tool")
 	err := server.RegisterTool("greeting/hello", "Generate a greeting message",
 		func(args GreetingHelloArgs) (*mcp.ToolResponse, error) {
-			zap.S().Debug("executing greeting/hello",
-				zap.String("name", args.Name))
+			zap.S().Debugw("executing greeting/hello",
+				"name", args.Name)
 
 			// Generate greeting
 			greeting, err := greeter.GenerateGreeting(args.Name)
 			if err != nil {
-				zap.S().Error("failed to generate greeting",
-					zap.String("name", args.Name),
-					zap.Error(err))
+				zap.S().Errorw("failed to generate greeting",
+					"name", args.Name,
+					"error", err)
 				return nil, errors.Wrap(err, "failed to generate greeting")
 			}
 
@@ -37,7 +37,7 @@ func RegisterGreetingHelloTool(server *mcp.Server, greeter Greeter) error {
 		})
 
 	if err != nil {
-		zap.S().Error("failed to register greeting/hello tool", zap.Error(err))
+		zap.S().Errorw("failed to register greeting/hello tool", "error", err)
 		return errors.Wrap(err, "failed to register greeting/hello tool")
 	}
 

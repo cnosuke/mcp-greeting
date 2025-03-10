@@ -9,42 +9,42 @@ import (
 	"go.uber.org/zap/zaptest"
 )
 
-// TestNewGreetingServer - GreetingServerの初期化テスト
+// TestNewGreetingServer - Test initialization of GreetingServer
 func TestNewGreetingServer(t *testing.T) {
-	// テスト用のロガーを設定
+	// Set up test logger
 	logger := zaptest.NewLogger(t)
 	zap.ReplaceGlobals(logger)
 
-	// テスト用の設定
+	// Test configuration
 	cfg := &config.Config{}
-	cfg.Greeting.DefaultMessage = "テスト用挨拶"
+	cfg.Greeting.DefaultMessage = "Test greeting"
 
-	// サーバーの作成
+	// Create server
 	server, err := NewGreetingServer(cfg)
 
-	// アサーション
+	// Assertions
 	assert.NoError(t, err)
 	assert.NotNil(t, server)
-	assert.Equal(t, "テスト用挨拶", server.DefaultMessage)
+	assert.Equal(t, "Test greeting", server.DefaultMessage)
 }
 
-// TestSetupServerComponents - サーバーのセットアップロジックをテスト
+// TestSetupServerComponents - Test server setup logic
 func TestSetupServerComponents(t *testing.T) {
-	// テスト用のロガーを設定
+	// Set up test logger
 	logger := zaptest.NewLogger(t)
 	zap.ReplaceGlobals(logger)
 
-	// テスト用の設定
+	// Test configuration
 	cfg := &config.Config{}
-	cfg.Greeting.DefaultMessage = "テスト用挨拶"
+	cfg.Greeting.DefaultMessage = "Test greeting"
 
-	// サーバーを作成してテスト
+	// Create and test server
 	greetingServer, err := NewGreetingServer(cfg)
 	assert.NoError(t, err)
 	assert.NotNil(t, greetingServer)
 
-	// 挨拶生成機能のテスト
-	greeting, err := greetingServer.GenerateGreeting("テストユーザー")
+	// Test greeting generation functionality
+	greeting, err := greetingServer.GenerateGreeting("Test User")
 	assert.NoError(t, err)
-	assert.Equal(t, "テスト用挨拶 テストユーザーさん！", greeting)
+	assert.Equal(t, "Test greeting Test User!", greeting)
 }

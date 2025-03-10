@@ -2,21 +2,21 @@ package tools
 
 import (
 	"testing"
-	
+
 	"github.com/stretchr/testify/assert"
 )
 
-// GreetingHelloArgsのテスト
+// Test for GreetingHelloArgs
 func TestGreetingHelloArgs(t *testing.T) {
-	// 名前が空の場合
+	// When name is empty
 	argsEmpty := GreetingHelloArgs{
 		Name: "",
 	}
 	assert.Equal(t, "", argsEmpty.Name)
-	
-	// 名前が設定されている場合
+
+	// When name is set
 	argsWithName := GreetingHelloArgs{
-		Name: "テスト太郎",
+		Name: "Test User",
 	}
-	assert.Equal(t, "テスト太郎", argsWithName.Name)
+	assert.Equal(t, "Test User", argsWithName.Name)
 }

@@ -6,27 +6,27 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// GreetingHelloToolのテスト
+// Test for GreetingHelloTool
 func TestGreeterFunctionality(t *testing.T) {
-	// このテストは、Greeterインターフェースの基本機能をテストします
-	// 実際のMCPサーバー統合テストはここでは行いません
+	// This test verifies the basic functionality of the Greeter interface
+	// It does not perform actual MCP server integration testing
 
-	// モックGreeterインスタンス
+	// Mock Greeter instance
 	mockGreeter := &TestGreeter{
-		defaultMessage: "こんにちは！",
+		defaultMessage: "Hello!",
 	}
 
-	// テスト
+	// Test
 	greeting1, err := mockGreeter.GenerateGreeting("")
 	assert.NoError(t, err)
-	assert.Equal(t, "こんにちは！", greeting1)
+	assert.Equal(t, "Hello!", greeting1)
 
-	greeting2, err := mockGreeter.GenerateGreeting("田中")
+	greeting2, err := mockGreeter.GenerateGreeting("Tanaka")
 	assert.NoError(t, err)
-	assert.Equal(t, "こんにちは！ 田中さん！", greeting2)
+	assert.Equal(t, "Hello! Tanaka!", greeting2)
 }
 
-// テスト用のGreeter実装
+// Test implementation of Greeter
 type TestGreeter struct {
 	defaultMessage string
 }
@@ -35,5 +35,5 @@ func (g *TestGreeter) GenerateGreeting(name string) (string, error) {
 	if name == "" {
 		return g.defaultMessage, nil
 	}
-	return g.defaultMessage + " " + name + "さん！", nil
+	return g.defaultMessage + " " + name + "!", nil
 }

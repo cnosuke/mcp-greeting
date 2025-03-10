@@ -7,7 +7,7 @@ import (
 // Config - Application configuration
 type Config struct {
 	Greeting struct {
-		DefaultMessage string `yaml:"default_message" default:"こんにちは！" env:"GREETING_DEFAULT_MESSAGE"`
+		DefaultMessage string `yaml:"default_message" default:"Hello!" env:"GREETING_DEFAULT_MESSAGE"`
 	} `yaml:"greeting"`
 }
 
