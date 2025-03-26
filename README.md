@@ -16,20 +16,27 @@ MCP Greeting Server is a Go-based MCP server implementation that provides basic 
 The server is configured via a YAML file (default: config.yml). For example:
 
 ```yaml
+log: 'path/to/mcp-greeting.log' # Log file path, if empty no log will be produced
+debug: false # Enable debug mode for verbose logging
+
 greeting:
   default_message: "こんにちは！"
 ```
 
 Note: The default greeting message can also be injected via an environment variable `GREETING_DEFAULT_MESSAGE`. If this environment variable is set, it will override the value in the configuration file.
 
+You can override configurations using environment variables:
+- `LOG_PATH`: Path to log file
+- `DEBUG`: Enable debug mode (true/false)
+- `GREETING_DEFAULT_MESSAGE`: Default greeting message
+
 ## Logging
 
-Adjust logging behavior using the following command-line flags:
+Logging behavior is controlled through configuration:
 
-* `--no-logs`: Suppress non-critical logs.
-* `--log`: Specify a file path to write logs.
-
-Important: When using the MCP server with a stdio transport, logging must not be directed to standard output because it would interfere with the MCP protocol communication. Therefore, you should always use `--no-logs` along with `--log` to ensure that all logs are written exclusively to a log file.
+- If `log` is set in the config file, logs will be written to the specified file
+- If `log` is empty, no logs will be produced
+- Set `debug: true` for more verbose logging
 
 ## MCP Server Usage
 
@@ -46,8 +53,10 @@ To integrate with Claude Desktop, add an entry to your `claude_desktop_config.js
   "mcpServers": {
     "greeting": {
       "command": "./bin/mcp-greeting",
-      "args": ["server", "--no-logs", "--log", "mcp-greeting.log"],
+      "args": ["server"],
       "env": {
+        "LOG_PATH": "mcp-greeting.log",
+        "DEBUG": "false",
         "GREETING_DEFAULT_MESSAGE": "こんにちは"
       }
     }
@@ -55,7 +64,7 @@ To integrate with Claude Desktop, add an entry to your `claude_desktop_config.js
 }
 ```
 
-This configuration registers the MCP Greeting Server with Claude Desktop, ensuring that all logs are directed to the specified log file rather than interfering with the MCP protocol messages transmitted over stdio.
+This configuration registers the MCP Greeting Server with Claude Desktop, ensuring that all logs are directed to the specified log file.
 
 ## Contributing
 
