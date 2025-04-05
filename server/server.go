@@ -1,6 +1,9 @@
 package server
 
 import (
+	"context"
+
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"go.uber.org/zap"
 
@@ -21,12 +24,22 @@ func Run(cfg *config.Config) error {
 		return err
 	}
 
+	// Create custom hooks for error handling
+	hooks := &server.Hooks{}
+	hooks.AddOnError(func(ctx context.Context, id any, method mcp.MCPMethod, message any, err error) {
+		zap.S().Errorw("MCP error occurred",
+			"id", id,
+			"method", method,
+			"error", err,
+		)
+	})
+
 	// Create MCP server with server name and version
 	zap.S().Debugw("creating MCP server")
 	mcpServer := server.NewMCPServer(
 		"MCP Greeting Server",
 		"1.0.0",
-		server.WithLogging(),
+		server.WithHooks(hooks),
 	)
 
 	// Register all tools
