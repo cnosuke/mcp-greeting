@@ -2,12 +2,13 @@ package tools
 
 import (
 	"context"
+
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"go.uber.org/zap"
 )
 
-// GreetingHelloArgs - Arguments for greeting/hello tool (kept for testing compatibility)
+// GreetingHelloArgs - Arguments for greeting_hello tool (kept for testing compatibility)
 type GreetingHelloArgs struct {
 	Name string `json:"name" jsonschema:"description=Optional name for personalized greeting"`
 }
@@ -17,12 +18,12 @@ type Greeter interface {
 	GenerateGreeting(name string) (string, error)
 }
 
-// RegisterGreetingHelloTool - Register the greeting/hello tool
+// RegisterGreetingHelloTool - Register the greeting_hello tool
 func RegisterGreetingHelloTool(mcpServer *server.MCPServer, greeter Greeter) error {
-	zap.S().Debugw("registering greeting/hello tool")
+	zap.S().Debugw("registering greeting_hello tool")
 
 	// Define the tool
-	tool := mcp.NewTool("greeting/hello",
+	tool := mcp.NewTool("greeting_hello",
 		mcp.WithDescription("Generate a greeting message"),
 		mcp.WithString("name",
 			mcp.Description("Optional name for personalized greeting"),
@@ -37,7 +38,7 @@ func RegisterGreetingHelloTool(mcpServer *server.MCPServer, greeter Greeter) err
 			name = nameVal
 		}
 
-		zap.S().Debugw("executing greeting/hello",
+		zap.S().Debugw("executing greeting_hello",
 			"name", name)
 
 		// Generate greeting
