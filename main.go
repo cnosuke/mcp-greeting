@@ -55,8 +55,7 @@ func main() {
 				}
 				defer logger.Sync()
 
-				// Start the server
-				return server.Run(cfg)
+				return server.Run(cfg, Name, Version, Revision)
 			},
 		},
 	}

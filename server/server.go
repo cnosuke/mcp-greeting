@@ -13,8 +13,14 @@ import (
 )
 
 // Run - Execute the MCP server
-func Run(cfg *config.Config) error {
+func Run(cfg *config.Config, name string, version string, revision string) error {
 	zap.S().Infow("starting MCP Greeting Server")
+
+	// Format version string with revision if available
+	versionString := version
+	if revision != "" && revision != "xxx" {
+		versionString = versionString + " (" + revision + ")"
+	}
 
 	// Create Greeting server
 	zap.S().Debugw("creating Greeting server")
@@ -35,10 +41,13 @@ func Run(cfg *config.Config) error {
 	})
 
 	// Create MCP server with server name and version
-	zap.S().Debugw("creating MCP server")
+	zap.S().Debugw("creating MCP server",
+		"name", name,
+		"version", versionString,
+	)
 	mcpServer := server.NewMCPServer(
-		"MCP Greeting Server",
-		"1.0.0",
+		name,
+		versionString,
 		server.WithHooks(hooks),
 	)
 
