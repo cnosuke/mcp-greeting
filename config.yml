@@ -1,4 +1,4 @@
-log: 'path/to/mcp-greeting.log'
+log: 'mcp-greeting.log'
 debug: false
 
 greeting:

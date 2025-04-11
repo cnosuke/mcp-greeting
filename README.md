@@ -9,7 +9,66 @@ MCP Greeting Server is a Go-based MCP server implementation that provides basic 
 
 ## Requirements
 
-* Go 1.24 or later
+- Docker (recommended)
+
+For local development:
+
+- Go 1.24 or later
+
+## Using with Docker (Recommended)
+
+```bash
+docker pull cnosuke/mcp-greeting:latest
+
+docker run -i --rm cnosuke/mcp-greeting:latest
+```
+
+### Using with Claude Desktop (Docker)
+
+To integrate with Claude Desktop using Docker, add an entry to your `claude_desktop_config.json` file:
+
+```json
+{
+  "mcpServers": {
+    "greeting": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "cnosuke/mcp-greeting:latest"]
+    }
+  }
+}
+```
+
+## Building and Running (Go Binary)
+
+Alternatively, you can build and run the Go binary directly:
+
+```bash
+# Build the server
+make bin/mcp-greeting
+
+# Run the server
+./bin/mcp-greeting server --config=config.yml
+```
+
+### Using with Claude Desktop (Go Binary)
+
+To integrate with Claude Desktop using the Go binary, add an entry to your `claude_desktop_config.json` file:
+
+```json
+{
+  "mcpServers": {
+    "greeting": {
+      "command": "./bin/mcp-greeting",
+      "args": ["server"],
+      "env": {
+        "LOG_PATH": "mcp-greeting.log",
+        "DEBUG": "false",
+        "GREETING_DEFAULT_MESSAGE": "こんにちは"
+      }
+    }
+  }
+}
+```
 
 ## Configuration
 
@@ -44,27 +103,17 @@ MCP clients interact with the server by sending JSON‐RPC requests to execute v
 
 * `greeting/hello`: Generates a greeting message, with an optional name parameter for personalization.
 
-### Using with Claude Desktop
+## Command-Line Parameters
 
-To integrate with Claude Desktop, add an entry to your `claude_desktop_config.json` file. Because MCP uses stdio for communication, you must redirect logs away from stdio by using the `--no-logs` and `--log` flags:
+When starting the server, you can specify various settings:
 
-```json
-{
-  "mcpServers": {
-    "greeting": {
-      "command": "./bin/mcp-greeting",
-      "args": ["server"],
-      "env": {
-        "LOG_PATH": "mcp-greeting.log",
-        "DEBUG": "false",
-        "GREETING_DEFAULT_MESSAGE": "こんにちは"
-      }
-    }
-  }
-}
+```bash
+./bin/mcp-greeting server [options]
 ```
 
-This configuration registers the MCP Greeting Server with Claude Desktop, ensuring that all logs are directed to the specified log file.
+Options:
+
+- `--config`, `-c`: Path to the configuration file (default: "config.yml").
 
 ## Contributing
 
