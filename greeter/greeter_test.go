@@ -1,4 +1,4 @@
-package server
+package greeter
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGreetingServer_GenerateGreeting(t *testing.T) {
+func TestGreeter_GenerateGreeting(t *testing.T) {
 	// Test cases
 	testCases := []struct {
 		name           string
@@ -41,12 +41,12 @@ func TestGreetingServer_GenerateGreeting(t *testing.T) {
 			cfg := &config.Config{}
 			cfg.Greeting.DefaultMessage = tc.defaultMessage
 
-			// Initialize GreetingServer
-			server, err := NewGreetingServer(cfg)
+			// Initialize Greeter
+			greeter, err := NewGreeter(cfg)
 			assert.NoError(t, err)
 
 			// Generate greeting
-			greeting, err := server.GenerateGreeting(tc.inputName)
+			greeting, err := greeter.GenerateGreeting(tc.inputName)
 
 			// Assertions
 			assert.NoError(t, err)

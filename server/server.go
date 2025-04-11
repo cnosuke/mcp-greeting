@@ -3,13 +3,12 @@ package server
 import (
 	"context"
 
+	"github.com/cnosuke/mcp-greeting/config"
+	"github.com/cnosuke/mcp-greeting/greeter"
+	"github.com/cockroachdb/errors"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"go.uber.org/zap"
-
-	"github.com/cnosuke/mcp-greeting/config"
-	"github.com/cnosuke/mcp-greeting/server/tools"
-	"github.com/cockroachdb/errors"
 )
 
 // Run - Execute the MCP server
@@ -22,11 +21,11 @@ func Run(cfg *config.Config, name string, version string, revision string) error
 		versionString = versionString + " (" + revision + ")"
 	}
 
-	// Create Greeting server
-	zap.S().Debugw("creating Greeting server")
-	greetingServer, err := NewGreetingServer(cfg)
+	// Create Greeter
+	zap.S().Debugw("creating Greeter")
+	greeterInstance, err := greeter.NewGreeter(cfg)
 	if err != nil {
-		zap.S().Errorw("failed to create Greeting server", "error", err)
+		zap.S().Errorw("failed to create Greeter", "error", err)
 		return err
 	}
 
@@ -53,7 +52,7 @@ func Run(cfg *config.Config, name string, version string, revision string) error
 
 	// Register all tools
 	zap.S().Debugw("registering tools")
-	if err := tools.RegisterAllTools(mcpServer, greetingServer); err != nil {
+	if err := RegisterAllTools(mcpServer, greeterInstance); err != nil {
 		zap.S().Errorw("failed to register tools", "error", err)
 		return err
 	}
