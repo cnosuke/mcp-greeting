@@ -11,10 +11,28 @@ import (
 	"go.uber.org/zap"
 )
 
-// Run - Execute the MCP server
-func Run(cfg *config.Config, name string, version string, revision string) error {
-	zap.S().Infow("starting MCP Greeting Server")
+// RunStdio - Execute the MCP server with STDIO transport
+func RunStdio(cfg *config.Config, name string, version string, revision string) error {
+	zap.S().Infow("starting MCP Greeting Server with STDIO transport")
 
+	mcpServer, err := createMCPServer(cfg, name, version, revision)
+	if err != nil {
+		return err
+	}
+
+	zap.S().Infow("starting MCP server with STDIO")
+	err = server.ServeStdio(mcpServer)
+	if err != nil {
+		zap.S().Errorw("failed to start STDIO server", "error", err)
+		return errors.Wrap(err, "failed to start STDIO server")
+	}
+
+	zap.S().Infow("STDIO server shutting down")
+	return nil
+}
+
+// createMCPServer - Create MCP server instance with common configuration
+func createMCPServer(cfg *config.Config, name string, version string, revision string) (*server.MCPServer, error) {
 	// Format version string with revision if available
 	versionString := version
 	if revision != "" && revision != "xxx" {
@@ -26,7 +44,7 @@ func Run(cfg *config.Config, name string, version string, revision string) error
 	greeterInstance, err := greeter.NewGreeter(cfg)
 	if err != nil {
 		zap.S().Errorw("failed to create Greeter", "error", err)
-		return err
+		return nil, err
 	}
 
 	// Create custom hooks for error handling
@@ -54,18 +72,8 @@ func Run(cfg *config.Config, name string, version string, revision string) error
 	zap.S().Debugw("registering tools")
 	if err := RegisterAllTools(mcpServer, greeterInstance); err != nil {
 		zap.S().Errorw("failed to register tools", "error", err)
-		return err
+		return nil, err
 	}
 
-	// Start the server with stdio transport
-	zap.S().Infow("starting MCP server")
-	err = server.ServeStdio(mcpServer)
-	if err != nil {
-		zap.S().Errorw("failed to start server", "error", err)
-		return errors.Wrap(err, "failed to start server")
-	}
-
-	// ServeStdio will block until the server is terminated
-	zap.S().Infow("server shutting down")
-	return nil
+	return mcpServer, nil
 }
