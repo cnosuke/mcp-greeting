@@ -1,35 +1,102 @@
 package config
 
 import (
-	"github.com/jinzhu/configor"
+	"os"
+	"strconv"
+	"strings"
+
+	"github.com/knadh/koanf/parsers/yaml"
+	"github.com/knadh/koanf/providers/confmap"
+	"github.com/knadh/koanf/providers/file"
+	"github.com/knadh/koanf/v2"
 )
 
 // Config - Application configuration
 type Config struct {
-	Log   string `yaml:"log" default:"" env:"LOG_PATH"`
-	Debug bool   `yaml:"debug" default:"false" env:"DEBUG"`
+	Log   string `koanf:"log"`
+	Debug bool   `koanf:"debug"`
 
 	HTTP struct {
-		Binding          string   `yaml:"binding" default:"localhost:8080" env:"HTTP_BINDING"`
-		EndpointPath     string   `yaml:"endpoint_path" default:"/mcp" env:"HTTP_ENDPOINT_PATH"`
-		HeartbeatSeconds int      `yaml:"heartbeat_seconds" default:"30" env:"HTTP_HEARTBEAT_SECONDS"`
-		AuthToken        string   `yaml:"auth_token" default:"" env:"HTTP_AUTH_TOKEN"`
-		AllowedOrigins   []string `yaml:"allowed_origins" env:"HTTP_ALLOWED_ORIGINS"`
-	} `yaml:"http"`
+		Binding          string   `koanf:"binding"`
+		EndpointPath     string   `koanf:"endpoint_path"`
+		HeartbeatSeconds int      `koanf:"heartbeat_seconds"`
+		AuthToken        string   `koanf:"auth_token"`
+		AllowedOrigins   []string `koanf:"allowed_origins"`
+	} `koanf:"http"`
 
 	Greeting struct {
-		DefaultMessage string `yaml:"default_message" default:"Hello!" env:"GREETING_DEFAULT_MESSAGE"`
-	} `yaml:"greeting"`
+		DefaultMessage string `koanf:"default_message"`
+	} `koanf:"greeting"`
 }
 
 // LoadConfig - Load configuration file
 func LoadConfig(path string) (*Config, error) {
+	k := koanf.New(".")
+
+	// 1. Default values
+	if err := k.Load(confmap.Provider(defaultValues(), "."), nil); err != nil {
+		return nil, err
+	}
+
+	// 2. YAML file
+	if err := k.Load(file.Provider(path), yaml.Parser()); err != nil {
+		return nil, err
+	}
+
+	// 3. Environment variable overrides
+	if envOverrides := loadEnvOverrides(); len(envOverrides) > 0 {
+		if err := k.Load(confmap.Provider(envOverrides, "."), nil); err != nil {
+			return nil, err
+		}
+	}
+
+	// 4. Unmarshal
 	cfg := &Config{}
-	err := configor.New(&configor.Config{
-		Debug:      false,
-		Verbose:    false,
-		Silent:     true,
-		AutoReload: false,
-	}).Load(cfg, path)
-	return cfg, err
+	if err := k.Unmarshal("", cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func defaultValues() map[string]interface{} {
+	return map[string]interface{}{
+		"http.binding":             "localhost:8080",
+		"http.endpoint_path":       "/mcp",
+		"http.heartbeat_seconds":   30,
+		"greeting.default_message": "Hello!",
+	}
+}
+
+func loadEnvOverrides() map[string]interface{} {
+	envMapping := map[string]string{
+		"LOG_PATH":                 "log",
+		"DEBUG":                    "debug",
+		"HTTP_BINDING":             "http.binding",
+		"HTTP_ENDPOINT_PATH":       "http.endpoint_path",
+		"HTTP_HEARTBEAT_SECONDS":   "http.heartbeat_seconds",
+		"HTTP_AUTH_TOKEN":          "http.auth_token",
+		"HTTP_ALLOWED_ORIGINS":     "http.allowed_origins",
+		"GREETING_DEFAULT_MESSAGE": "greeting.default_message",
+	}
+
+	overrides := make(map[string]interface{})
+	for envKey, koanfKey := range envMapping {
+		val, ok := os.LookupEnv(envKey)
+		if !ok {
+			continue
+		}
+		switch koanfKey {
+		case "debug":
+			overrides[koanfKey] = val == "true" || val == "1"
+		case "http.heartbeat_seconds":
+			if n, err := strconv.Atoi(val); err == nil {
+				overrides[koanfKey] = n
+			}
+		case "http.allowed_origins":
+			overrides[koanfKey] = strings.Split(val, ",")
+		default:
+			overrides[koanfKey] = val
+		}
+	}
+	return overrides
 }
