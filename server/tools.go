@@ -38,9 +38,9 @@ func registerGreetingHelloTool(mcpServer *server.MCPServer, greeter *greeter.Gre
 
 	// Add the tool handler
 	mcpServer.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		// Extract name parameter
+		// Extract name parameter using the new API
 		var name string
-		if nameVal, ok := request.Params.Arguments["name"].(string); ok {
+		if nameVal, ok := request.GetArguments()["name"].(string); ok {
 			name = nameVal
 		}
 
