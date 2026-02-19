@@ -7,8 +7,10 @@ import (
 	"syscall"
 	"time"
 
+	"errors"
+
 	"github.com/cnosuke/mcp-greeting/config"
-	"github.com/cockroachdb/errors"
+	ierrors "github.com/cnosuke/mcp-greeting/internal/errors"
 	mcpserver "github.com/mark3labs/mcp-go/server"
 	"go.uber.org/zap"
 )
@@ -53,7 +55,7 @@ func RunHTTP(cfg *config.Config, name string, version string, revision string) e
 			"endpoint", cfg.HTTP.EndpointPath,
 		)
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			errCh <- errors.Wrap(err, "HTTP server error")
+			errCh <- ierrors.Wrap(err, "HTTP server error")
 		}
 		close(errCh)
 	}()
@@ -66,7 +68,7 @@ func RunHTTP(cfg *config.Config, name string, version string, revision string) e
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		if err := srv.Shutdown(shutdownCtx); err != nil {
-			return errors.Wrap(err, "failed to shutdown HTTP server")
+			return ierrors.Wrap(err, "failed to shutdown HTTP server")
 		}
 	}
 
