@@ -6,6 +6,7 @@ MCP Greeting Server is a Go-based MCP server implementation that provides basic 
 
 * MCP Compliance: Provides a JSON‐RPC based interface for tool execution according to the MCP specification.
 * Greeting Operations: Supports generating greeting messages, with options for personalization.
+* Transport Options: Supports both STDIO and Streamable HTTP transports.
 
 ## Requirements
 
@@ -45,9 +46,22 @@ Alternatively, you can build and run the Go binary directly:
 ```bash
 # Build the server
 make bin/mcp-greeting
+```
 
-# Run the server
-./bin/mcp-greeting server --config=config.yml
+### STDIO Transport
+
+Run the server with STDIO transport (used with Claude Desktop):
+
+```bash
+./bin/mcp-greeting stdioserver --config=config.yml
+```
+
+### HTTP Transport (Streamable HTTP)
+
+Run the server with Streamable HTTP transport:
+
+```bash
+./bin/mcp-greeting httpserver --config=config.yml
 ```
 
 ### Using with Claude Desktop (Go Binary)
@@ -59,7 +73,7 @@ To integrate with Claude Desktop using the Go binary, add an entry to your `clau
   "mcpServers": {
     "greeting": {
       "command": "./bin/mcp-greeting",
-      "args": ["server"],
+      "args": ["stdioserver"],
       "env": {
         "LOG_PATH": "mcp-greeting.log",
         "DEBUG": "false",
@@ -103,17 +117,16 @@ MCP clients interact with the server by sending JSON‐RPC requests to execute v
 
 * `greeting/hello`: Generates a greeting message, with an optional name parameter for personalization.
 
-## Command-Line Parameters
+## Command-Line Reference
 
-When starting the server, you can specify various settings:
-
-```bash
-./bin/mcp-greeting server [options]
 ```
+COMMANDS:
+   stdioserver, stdio, s  Run MCP server with STDIO transport
+   httpserver, http       Run MCP server with Streamable HTTP transport
 
-Options:
-
-- `--config`, `-c`: Path to the configuration file (default: "config.yml").
+OPTIONS (both commands):
+   --config value, -c value  Path to the configuration file (default: "config.yml")
+```
 
 ## Contributing
 
