@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -38,13 +39,19 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, err
 	}
 
-	// 2. YAML file
-	if err := k.Load(file.Provider(path), yaml.Parser()); err != nil {
-		return nil, err
+	// 2. YAML file (optional: skip if not found)
+	if _, err := os.Stat(path); err == nil {
+		if err := k.Load(file.Provider(path), yaml.Parser()); err != nil {
+			return nil, err
+		}
 	}
 
 	// 3. Environment variable overrides
-	if envOverrides := loadEnvOverrides(); len(envOverrides) > 0 {
+	envOverrides, err := loadEnvOverrides()
+	if err != nil {
+		return nil, err
+	}
+	if len(envOverrides) > 0 {
 		if err := k.Load(confmap.Provider(envOverrides, "."), nil); err != nil {
 			return nil, err
 		}
@@ -67,7 +74,7 @@ func defaultValues() map[string]interface{} {
 	}
 }
 
-func loadEnvOverrides() map[string]interface{} {
+func loadEnvOverrides() (map[string]interface{}, error) {
 	envMapping := map[string]string{
 		"LOG_PATH":                 "log",
 		"DEBUG":                    "debug",
@@ -89,14 +96,18 @@ func loadEnvOverrides() map[string]interface{} {
 		case "debug":
 			overrides[koanfKey] = val == "true" || val == "1"
 		case "http.heartbeat_seconds":
-			if n, err := strconv.Atoi(val); err == nil {
-				overrides[koanfKey] = n
+			n, err := strconv.Atoi(val)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for %s: %q", envKey, val)
 			}
+			overrides[koanfKey] = n
 		case "http.allowed_origins":
-			overrides[koanfKey] = strings.Split(val, ",")
+			if val != "" {
+				overrides[koanfKey] = strings.Split(val, ",")
+			}
 		default:
 			overrides[koanfKey] = val
 		}
 	}
-	return overrides
+	return overrides, nil
 }
