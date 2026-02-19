@@ -5,7 +5,7 @@ import (
 
 	"github.com/cnosuke/mcp-greeting/config"
 	"github.com/cnosuke/mcp-greeting/greeter"
-	"github.com/cockroachdb/errors"
+	ierrors "github.com/cnosuke/mcp-greeting/internal/errors"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"go.uber.org/zap"
@@ -24,7 +24,7 @@ func RunStdio(cfg *config.Config, name string, version string, revision string) 
 	err = server.ServeStdio(mcpServer)
 	if err != nil {
 		zap.S().Errorw("failed to start STDIO server", "error", err)
-		return errors.Wrap(err, "failed to start STDIO server")
+		return ierrors.Wrap(err, "failed to start STDIO server")
 	}
 
 	zap.S().Infow("STDIO server shutting down")
