@@ -64,10 +64,11 @@ func RunHTTP(cfg *config.Config, name string, version string, revision string) e
 		return err
 	case <-ctx.Done():
 		zap.S().Infow("shutting down HTTP server")
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
 		if err := srv.Shutdown(shutdownCtx); err != nil {
-			return ierrors.Wrap(err, "failed to shutdown HTTP server")
+			zap.S().Warnw("graceful shutdown timed out, forcing close", "error", err)
+			srv.Close()
 		}
 	}
 
