@@ -84,7 +84,7 @@ func withRequestLogging(next http.Handler) http.Handler {
 		}
 
 		if len(rpc.Params) > 0 {
-			zap.S().Debugw("request params", "rpc_method", rpc.Method, "params", string(rpc.Params))
+			fields = append(fields, "params_bytes", len(rpc.Params))
 		}
 		switch {
 		case sw.status >= 500:
@@ -103,13 +103,16 @@ type jsonRPCInfo struct {
 	Params   json.RawMessage
 }
 
+const maxPeekSize = 8 * 1024 // 8KB: enough to extract JSON-RPC method and tool name
+
 func peekJSONRPCRequest(r *http.Request) jsonRPCInfo {
 	if r.Body == nil {
 		return jsonRPCInfo{}
 	}
-	body, err := io.ReadAll(r.Body)
-	r.Body = io.NopCloser(bytes.NewReader(body))
-	if err != nil || len(body) == 0 {
+	peeked, err := io.ReadAll(io.LimitReader(r.Body, maxPeekSize))
+	remaining, _ := io.ReadAll(r.Body)
+	r.Body = io.NopCloser(io.MultiReader(bytes.NewReader(peeked), bytes.NewReader(remaining)))
+	if err != nil || len(peeked) == 0 {
 		return jsonRPCInfo{}
 	}
 
@@ -117,7 +120,7 @@ func peekJSONRPCRequest(r *http.Request) jsonRPCInfo {
 		Method string          `json:"method"`
 		Params json.RawMessage `json:"params"`
 	}
-	if json.Unmarshal(body, &req) != nil {
+	if json.Unmarshal(peeked, &req) != nil {
 		return jsonRPCInfo{}
 	}
 
