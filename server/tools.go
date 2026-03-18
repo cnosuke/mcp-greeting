@@ -4,19 +4,17 @@ import (
 	"context"
 
 	"github.com/cnosuke/mcp-greeting/greeter"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"go.uber.org/zap"
 )
 
-// GreetingHelloArgs - Arguments for greeting_hello tool (kept for testing compatibility)
+// GreetingHelloArgs - Arguments for greeting_hello tool
 type GreetingHelloArgs struct {
-	Name string `json:"name" jsonschema:"description=Optional name for personalized greeting"`
+	Name string `json:"name" jsonschema:"Optional name for personalized greeting"`
 }
 
 // RegisterAllTools - Register all tools with the server
-func RegisterAllTools(mcpServer *server.MCPServer, greeter *greeter.Greeter) error {
-	// Register greeting_hello tool
+func RegisterAllTools(mcpServer *mcp.Server, greeter *greeter.Greeter) error {
 	if err := registerGreetingHelloTool(mcpServer, greeter); err != nil {
 		return err
 	}
@@ -25,38 +23,30 @@ func RegisterAllTools(mcpServer *server.MCPServer, greeter *greeter.Greeter) err
 }
 
 // registerGreetingHelloTool - Register the greeting_hello tool
-func registerGreetingHelloTool(mcpServer *server.MCPServer, greeter *greeter.Greeter) error {
+func registerGreetingHelloTool(mcpServer *mcp.Server, greeter *greeter.Greeter) error {
 	zap.S().Debugw("registering greeting_hello tool")
 
-	// Define the tool
-	tool := mcp.NewTool("greeting_hello",
-		mcp.WithDescription("Generate a greeting message"),
-		mcp.WithString("name",
-			mcp.Description("Optional name for personalized greeting"),
-		),
-	)
-
-	// Add the tool handler
-	mcpServer.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		// Extract name parameter using the new API
-		var name string
-		if nameVal, ok := request.GetArguments()["name"].(string); ok {
-			name = nameVal
-		}
-
+	mcp.AddTool(mcpServer, &mcp.Tool{
+		Name:        "greeting_hello",
+		Description: "Generate a greeting message",
+	}, func(ctx context.Context, req *mcp.CallToolRequest, input GreetingHelloArgs) (*mcp.CallToolResult, struct{}, error) {
 		zap.S().Debugw("executing greeting_hello",
-			"name", name)
+			"name", input.Name)
 
-		// Generate greeting
-		greeting, err := greeter.GenerateGreeting(name)
+		greeting, err := greeter.GenerateGreeting(input.Name)
 		if err != nil {
 			zap.S().Errorw("failed to generate greeting",
-				"name", name,
+				"name", input.Name,
 				"error", err)
-			return mcp.NewToolResultError(err.Error()), nil
+			return &mcp.CallToolResult{
+				IsError: true,
+				Content: []mcp.Content{&mcp.TextContent{Text: err.Error()}},
+			}, struct{}{}, nil
 		}
 
-		return mcp.NewToolResultText(greeting), nil
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{&mcp.TextContent{Text: greeting}},
+		}, struct{}{}, nil
 	})
 
 	return nil
