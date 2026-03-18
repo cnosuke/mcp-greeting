@@ -38,10 +38,7 @@ func registerGreetingHelloTool(mcpServer *mcp.Server, greeter *greeter.Greeter) 
 			zap.S().Errorw("failed to generate greeting",
 				"name", input.Name,
 				"error", err)
-			return &mcp.CallToolResult{
-				IsError: true,
-				Content: []mcp.Content{&mcp.TextContent{Text: err.Error()}},
-			}, struct{}{}, nil
+			return nil, struct{}{}, err
 		}
 
 		return &mcp.CallToolResult{

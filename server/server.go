@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/cnosuke/mcp-greeting/config"
 	"github.com/cnosuke/mcp-greeting/greeter"
@@ -51,7 +52,9 @@ func createMCPServer(cfg *config.Config, name string, version string, revision s
 	mcpServer := mcp.NewServer(&mcp.Implementation{
 		Name:    name,
 		Version: versionString,
-	}, nil)
+	}, &mcp.ServerOptions{
+		Logger: slog.Default(),
+	})
 
 	zap.S().Debugw("registering tools")
 	if err := RegisterAllTools(mcpServer, greeterInstance); err != nil {
