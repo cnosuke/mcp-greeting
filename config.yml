@@ -1,5 +1,5 @@
+log_level: 'info'    # debug, info, warn, error
 log: 'mcp-greeting.log'
-debug: true
 
 http:
   binding: "localhost:8080"

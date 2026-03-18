@@ -12,8 +12,8 @@ import (
 
 // Config - Application configuration
 type Config struct {
-	Log   string `koanf:"log"`
-	Debug bool   `koanf:"debug"`
+	Log      string `koanf:"log"`
+	LogLevel string `koanf:"log_level"`
 
 	HTTP struct {
 		Binding        string   `koanf:"binding"`
@@ -64,6 +64,7 @@ func LoadConfig(path string) (*Config, error) {
 
 func defaultValues() map[string]interface{} {
 	return map[string]interface{}{
+		"log_level":                "info",
 		"http.binding":             "localhost:8080",
 		"http.endpoint_path":       "/mcp",
 		"greeting.default_message": "Hello!",
@@ -73,7 +74,7 @@ func defaultValues() map[string]interface{} {
 func loadEnvOverrides() (map[string]interface{}, error) {
 	envMapping := map[string]string{
 		"LOG_PATH":                 "log",
-		"DEBUG":                    "debug",
+		"LOG_LEVEL":                "log_level",
 		"HTTP_BINDING":             "http.binding",
 		"HTTP_ENDPOINT_PATH":       "http.endpoint_path",
 		"HTTP_AUTH_TOKEN":          "http.auth_token",
@@ -88,8 +89,6 @@ func loadEnvOverrides() (map[string]interface{}, error) {
 			continue
 		}
 		switch koanfKey {
-		case "debug":
-			overrides[koanfKey] = val == "true" || val == "1"
 		case "http.allowed_origins":
 			if val != "" {
 				overrides[koanfKey] = strings.Split(val, ",")
