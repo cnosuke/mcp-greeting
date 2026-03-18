@@ -13,6 +13,11 @@ type GreetingHelloArgs struct {
 	Name string `json:"name" jsonschema:"Optional name for personalized greeting"`
 }
 
+// GreetingHelloResult - Result for greeting_hello tool
+type GreetingHelloResult struct {
+	Greeting string `json:"greeting"`
+}
+
 // RegisterAllTools - Register all tools with the server
 func RegisterAllTools(mcpServer *mcp.Server, greeter *greeter.Greeter) error {
 	if err := registerGreetingHelloTool(mcpServer, greeter); err != nil {
@@ -29,7 +34,7 @@ func registerGreetingHelloTool(mcpServer *mcp.Server, greeter *greeter.Greeter) 
 	mcp.AddTool(mcpServer, &mcp.Tool{
 		Name:        "greeting_hello",
 		Description: "Generate a greeting message",
-	}, func(ctx context.Context, req *mcp.CallToolRequest, input GreetingHelloArgs) (*mcp.CallToolResult, struct{}, error) {
+	}, func(ctx context.Context, req *mcp.CallToolRequest, input GreetingHelloArgs) (*mcp.CallToolResult, GreetingHelloResult, error) {
 		zap.S().Debugw("executing greeting_hello",
 			"name", input.Name)
 
@@ -38,12 +43,10 @@ func registerGreetingHelloTool(mcpServer *mcp.Server, greeter *greeter.Greeter) 
 			zap.S().Errorw("failed to generate greeting",
 				"name", input.Name,
 				"error", err)
-			return nil, struct{}{}, err
+			return nil, GreetingHelloResult{}, err
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: greeting}},
-		}, struct{}{}, nil
+		return nil, GreetingHelloResult{Greeting: greeting}, nil
 	})
 
 	return nil
