@@ -1,9 +1,7 @@
 package config
 
 import (
-	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/knadh/koanf/parsers/yaml"
@@ -18,11 +16,10 @@ type Config struct {
 	Debug bool   `koanf:"debug"`
 
 	HTTP struct {
-		Binding          string   `koanf:"binding"`
-		EndpointPath     string   `koanf:"endpoint_path"`
-		HeartbeatSeconds int      `koanf:"heartbeat_seconds"`
-		AuthToken        string   `koanf:"auth_token"`
-		AllowedOrigins   []string `koanf:"allowed_origins"`
+		Binding        string   `koanf:"binding"`
+		EndpointPath   string   `koanf:"endpoint_path"`
+		AuthToken      string   `koanf:"auth_token"`
+		AllowedOrigins []string `koanf:"allowed_origins"`
 	} `koanf:"http"`
 
 	Greeting struct {
@@ -69,7 +66,6 @@ func defaultValues() map[string]interface{} {
 	return map[string]interface{}{
 		"http.binding":             "localhost:8080",
 		"http.endpoint_path":       "/mcp",
-		"http.heartbeat_seconds":   30,
 		"greeting.default_message": "Hello!",
 	}
 }
@@ -80,7 +76,6 @@ func loadEnvOverrides() (map[string]interface{}, error) {
 		"DEBUG":                    "debug",
 		"HTTP_BINDING":             "http.binding",
 		"HTTP_ENDPOINT_PATH":       "http.endpoint_path",
-		"HTTP_HEARTBEAT_SECONDS":   "http.heartbeat_seconds",
 		"HTTP_AUTH_TOKEN":          "http.auth_token",
 		"HTTP_ALLOWED_ORIGINS":     "http.allowed_origins",
 		"GREETING_DEFAULT_MESSAGE": "greeting.default_message",
@@ -95,12 +90,6 @@ func loadEnvOverrides() (map[string]interface{}, error) {
 		switch koanfKey {
 		case "debug":
 			overrides[koanfKey] = val == "true" || val == "1"
-		case "http.heartbeat_seconds":
-			n, err := strconv.Atoi(val)
-			if err != nil {
-				return nil, fmt.Errorf("invalid value for %s: %q", envKey, val)
-			}
-			overrides[koanfKey] = n
 		case "http.allowed_origins":
 			if val != "" {
 				overrides[koanfKey] = strings.Split(val, ",")

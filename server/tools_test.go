@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/cnosuke/mcp-greeting/greeter"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"
@@ -32,7 +32,7 @@ func TestRegisterAllTools(t *testing.T) {
 	zap.ReplaceGlobals(logger)
 
 	// Create MCP server
-	mcpServer := server.NewMCPServer("test-server", "0.0.1")
+	mcpServer := mcp.NewServer(&mcp.Implementation{Name: "test-server", Version: "0.0.1"}, nil)
 
 	// Create mock greeter instance
 	cfg := &greeter.Greeter{
@@ -42,8 +42,4 @@ func TestRegisterAllTools(t *testing.T) {
 	// Register tools
 	err := RegisterAllTools(mcpServer, cfg)
 	assert.NoError(t, err)
-
-	// Verify that tools are registered
-	// This is a basic test - we're just making sure registration doesn't fail
-	// More comprehensive tests would verify the actual tool behavior
 }

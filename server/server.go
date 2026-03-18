@@ -2,12 +2,12 @@ package server
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/cnosuke/mcp-greeting/config"
 	"github.com/cnosuke/mcp-greeting/greeter"
 	ierrors "github.com/cnosuke/mcp-greeting/internal/errors"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"go.uber.org/zap"
 )
 
@@ -21,7 +21,7 @@ func RunStdio(cfg *config.Config, name string, version string, revision string) 
 	}
 
 	zap.S().Infow("starting MCP server with STDIO")
-	err = server.ServeStdio(mcpServer)
+	err = mcpServer.Run(context.Background(), &mcp.StdioTransport{})
 	if err != nil {
 		zap.S().Errorw("failed to start STDIO server", "error", err)
 		return ierrors.Wrap(err, "failed to start STDIO server")
@@ -32,14 +32,12 @@ func RunStdio(cfg *config.Config, name string, version string, revision string) 
 }
 
 // createMCPServer - Create MCP server instance with common configuration
-func createMCPServer(cfg *config.Config, name string, version string, revision string) (*server.MCPServer, error) {
-	// Format version string with revision if available
+func createMCPServer(cfg *config.Config, name string, version string, revision string) (*mcp.Server, error) {
 	versionString := version
 	if revision != "" && revision != "xxx" {
 		versionString = versionString + " (" + revision + ")"
 	}
 
-	// Create Greeter
 	zap.S().Debugw("creating Greeter")
 	greeterInstance, err := greeter.NewGreeter(cfg)
 	if err != nil {
@@ -47,28 +45,17 @@ func createMCPServer(cfg *config.Config, name string, version string, revision s
 		return nil, err
 	}
 
-	// Create custom hooks for error handling
-	hooks := &server.Hooks{}
-	hooks.AddOnError(func(ctx context.Context, id any, method mcp.MCPMethod, message any, err error) {
-		zap.S().Errorw("MCP error occurred",
-			"id", id,
-			"method", method,
-			"error", err,
-		)
-	})
-
-	// Create MCP server with server name and version
 	zap.S().Debugw("creating MCP server",
 		"name", name,
 		"version", versionString,
 	)
-	mcpServer := server.NewMCPServer(
-		name,
-		versionString,
-		server.WithHooks(hooks),
-	)
+	mcpServer := mcp.NewServer(&mcp.Implementation{
+		Name:    name,
+		Version: versionString,
+	}, &mcp.ServerOptions{
+		Logger: slog.Default(),
+	})
 
-	// Register all tools
 	zap.S().Debugw("registering tools")
 	if err := RegisterAllTools(mcpServer, greeterInstance); err != nil {
 		zap.S().Errorw("failed to register tools", "error", err)

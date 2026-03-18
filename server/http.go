@@ -11,7 +11,7 @@ import (
 
 	"github.com/cnosuke/mcp-greeting/config"
 	ierrors "github.com/cnosuke/mcp-greeting/internal/errors"
-	mcpserver "github.com/mark3labs/mcp-go/server"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"go.uber.org/zap"
 )
 
@@ -24,12 +24,10 @@ func RunHTTP(cfg *config.Config, name string, version string, revision string) e
 		return err
 	}
 
-	var opts []mcpserver.StreamableHTTPOption
-	if cfg.HTTP.HeartbeatSeconds > 0 {
-		opts = append(opts, mcpserver.WithHeartbeatInterval(time.Duration(cfg.HTTP.HeartbeatSeconds)*time.Second))
-	}
-
-	httpHandler := mcpserver.NewStreamableHTTPServer(mcpSrv, opts...)
+	httpHandler := mcp.NewStreamableHTTPHandler(
+		func(r *http.Request) *mcp.Server { return mcpSrv },
+		nil,
+	)
 
 	var handler http.Handler = httpHandler
 	handler = withAuthMiddleware(handler, cfg.HTTP.AuthToken)
