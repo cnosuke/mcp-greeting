@@ -9,9 +9,8 @@ import (
 )
 
 // InitLogger initializes the global logger.
-// logLevel: "debug", "info", "warn", "error"
-// logPath: file path for log output (empty to skip file logging)
-// suppressConsole: when true, suppresses stdout/stderr output (used in stdio mode)
+// In stdio mode (suppressConsole=true), console output is suppressed
+// to prevent interference with MCP JSON-RPC protocol communication.
 func InitLogger(logLevel string, logPath string, suppressConsole bool) error {
 	level, err := zapcore.ParseLevel(logLevel)
 	if err != nil {
@@ -83,12 +82,5 @@ func InitLogger(logLevel string, logPath string, suppressConsole bool) error {
 
 // Sync flushes any buffered log entries
 func Sync() error {
-	if err := zap.S().Sync(); err != nil {
-		return err
-	}
-	if err := zap.L().Sync(); err != nil {
-		return err
-	}
-
-	return nil
+	return zap.L().Sync()
 }
