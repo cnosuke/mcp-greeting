@@ -58,6 +58,13 @@ func TestStatusWriter_Flush(t *testing.T) {
 	assert.True(t, ff.flushed)
 }
 
+func TestStatusWriter_Unwrap(t *testing.T) {
+	rec := httptest.NewRecorder()
+	sw := &statusWriter{ResponseWriter: rec, status: http.StatusOK}
+
+	assert.Equal(t, rec, sw.Unwrap())
+}
+
 // --- peekJSONRPCRequest tests ---
 
 func TestPeekJSONRPCRequest_NilBody(t *testing.T) {
