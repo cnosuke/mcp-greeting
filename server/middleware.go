@@ -110,8 +110,7 @@ func peekJSONRPCRequest(r *http.Request) jsonRPCInfo {
 		return jsonRPCInfo{}
 	}
 	peeked, err := io.ReadAll(io.LimitReader(r.Body, maxPeekSize))
-	remaining, _ := io.ReadAll(r.Body)
-	r.Body = io.NopCloser(io.MultiReader(bytes.NewReader(peeked), bytes.NewReader(remaining)))
+	r.Body = io.NopCloser(io.MultiReader(bytes.NewReader(peeked), r.Body))
 	if err != nil || len(peeked) == 0 {
 		return jsonRPCInfo{}
 	}
