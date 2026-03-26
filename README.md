@@ -76,7 +76,7 @@ To integrate with Claude Desktop using the Go binary, add an entry to your `clau
       "args": ["stdioserver"],
       "env": {
         "LOG_PATH": "mcp-greeting.log",
-        "DEBUG": "false",
+        "LOG_LEVEL": "info",
         "GREETING_DEFAULT_MESSAGE": "こんにちは"
       }
     }
@@ -90,7 +90,13 @@ The server is configured via a YAML file (default: config.yml). For example:
 
 ```yaml
 log: 'path/to/mcp-greeting.log' # Log file path, if empty no log will be produced
-debug: false # Enable debug mode for verbose logging
+log_level: 'info'               # debug, info, warn, error
+
+http:
+  binding: 'localhost:8080'
+  endpoint_path: '/mcp'
+  auth_token: ''                # Bearer token for authentication (optional)
+  allowed_origins: []           # CORS allowed origins (optional)
 
 greeting:
   default_message: "こんにちは！"
@@ -100,7 +106,11 @@ Note: The default greeting message can also be injected via an environment varia
 
 You can override configurations using environment variables:
 - `LOG_PATH`: Path to log file
-- `DEBUG`: Enable debug mode (true/false)
+- `LOG_LEVEL`: Log level (debug, info, warn, error)
+- `HTTP_BINDING`: HTTP server binding address
+- `HTTP_ENDPOINT_PATH`: HTTP endpoint path
+- `HTTP_AUTH_TOKEN`: Bearer token for authentication
+- `HTTP_ALLOWED_ORIGINS`: Comma-separated list of allowed CORS origins
 - `GREETING_DEFAULT_MESSAGE`: Default greeting message
 
 ## Logging
@@ -109,7 +119,9 @@ Logging behavior is controlled through configuration:
 
 - If `log` is set in the config file, logs will be written to the specified file
 - If `log` is empty, no logs will be produced
-- Set `debug: true` for more verbose logging
+- Set `log_level` to control verbosity: `debug`, `info` (default), `warn`, `error`
+- In STDIO mode, console output is suppressed to preserve JSON-RPC protocol integrity
+- In HTTP mode, logs are output to console (info/below to stdout, warn/above to stderr)
 
 ## MCP Server Usage
 

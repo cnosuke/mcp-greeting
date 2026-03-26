@@ -37,4 +37,4 @@ USER nonroot:nonroot
 ENTRYPOINT ["/app/mcp-greeting"]
 
 # Default command
-CMD ["server", "--config", "config.yml"]
+CMD ["httpserver", "--config", "config.yml"]
